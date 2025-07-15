@@ -1,0 +1,193 @@
+Here’s the full **vibe-coded, compressed, and brutalist PRD + tech stack reference doc** in one artifact. Ready to be dropped into Notion, Linear, or wherever you stack your cosmic spaghetti.
+
+---
+
+# 🌀 **BTC Yield Explorer — PRD v0.1**
+
+---
+
+## 💡 **Core Concept**
+
+Interactive flowchart-style app for exploring BTC yield opportunities. User starts at "BTC Yield" root, drills into five high-level categories, then specific DeFi strategy types, then concrete strategies with live yields.
+
+**Primary goal:** Stop "what’s the best BTC yield rn?" Twitter replies forever. Canonical, always-updating yield oracle for the masses.
+
+---
+
+## 🌳 **Information Architecture**
+
+```
+BTC Yield
+├── Native BTC yield
+├── CEX LSTs
+├── On-chain LSTs
+├── Babylon/CoreDAO LSTs + Security-as-a-Service
+├── L2 strategies
+```
+
+Within each:
+
+```
+DeFi Opportunities
+├── DEX LPs
+├── Lending LPs
+├── Perp DEX LPs
+├── Cross-chain LPs
+├── Alt LPs
+```
+
+Final node = list of strategies with:
+
+* Name
+* Real-time yield %
+* Entry guide (how to access)
+* Short description
+
+---
+
+## 🎛 **Key Features**
+
+### 🌀 Flowchart UI
+
+* Click-through tree navigation
+* Visually intuitive, non-intimidating
+* Breadcrumb trail for orientation
+
+---
+
+### 📃 Strategy List
+
+* Sorted by yield descending
+* Name + yield % + "How to get in"
+* Link out to underlying strategy if possible
+
+---
+
+### ⚡ Global Top 5 Sidebar
+
+* Always visible
+* Cross-category highest yields
+* Jump directly to strategy details
+
+---
+
+### 💬 Social Feed
+
+* Small widget
+* Example: Karen’s "Pastry Picks in Paris" or random BTC alpha
+* Optional, adds personality
+
+---
+
+## 🏗 **V1 Scope (MVP)**
+
+* Static backend database (manual updates)
+* Real-time yield % updated manually
+* No live chain integrations yet
+* Fully working flowchart UI
+* Top 5 sidebar
+* Admin panel for data entry
+
+---
+
+## ⚙️ **Tech Stack (POC)**
+
+### 💻 Frontend
+
+* **Next.js** — fast ship, good SEO, SSR optional
+* **Tailwind CSS** — keep styling atomic and sane
+* **React Flow** — dynamic flowchart rendering
+* **SWR** or **React Query** — real-time-ish data pulls
+
+---
+
+### 🗄 Backend
+
+* **Supabase** — Postgres + REST API + GraphQL + built-in auth + simple admin UI
+* **Postgres schema** designed for yield strategy data
+
+---
+
+### 🔑 Auth & Admin
+
+* Supabase Auth for gated data updates
+* Admin dashboard in Supabase UI
+
+---
+
+### 🚀 Deployment
+
+* **Vercel** — tight Next.js integration, instant previews, easy rollback
+
+---
+
+### 🗂 Database Schema Sketch
+
+```plaintext
+strategies
+- id
+- category (enum)
+- subcategory (enum)
+- name (text)
+- yield_percent (numeric)
+- description (text or markdown)
+- entry_guide (text or markdown)
+- last_updated_at (timestamp)
+```
+
+---
+
+## ⚠️ **Constraints**
+
+* Manual data = high-touch maintenance at first
+* UX > Everything (avoid spreadsheet vibes)
+* No flaky or stale yield data
+* Don’t shill sketchy ponzis or non-diligenced protocols
+
+---
+
+## 💣 **Don’t Fuck Up List**
+
+* Keep it minimal: no clutter, no bloat
+* Don’t show fake APYs; verify or disclaim
+* Flowchart must be buttery smooth
+* Admin updates should be trivial
+
+---
+
+## 🗺 **Next Steps**
+
+1️⃣ Finalize flowchart wireframe (low → mid fidelity)
+
+2️⃣ Confirm DB schema and Supabase setup
+
+3️⃣ Ship POC frontend (Next.js + React Flow + Tailwind)
+
+4️⃣ Manual seed of first 10–20 yield strategies
+
+5️⃣ Launch internal alpha for feedback
+
+---
+
+## 🏁 **Why?**
+
+* Kills alpha info asymmetry
+* Establishes canonical "BTC yield map"
+* Moves BTC narrative beyond hodl-only monk mode
+
+---
+
+### 🤝 Reference
+
+```
+Frontend: Next.js + Tailwind CSS + React Flow + SWR/React Query
+Backend: Supabase (Postgres, Auth, Admin UI)
+Deployment: Vercel
+```
+
+---
+
+### 💥 **Vibe Check Complete**
+
+✅ Drop if you want explicit wireframe sketches, example DB migration file, or admin panel copy text next.
+

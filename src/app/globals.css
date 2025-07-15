@@ -1,0 +1,202 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --btc-orange: #f7931a;
+  --btc-orange-light: #ffb347;
+  --btc-orange-dark: #e8841a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-btc-orange: var(--btc-orange);
+  --color-btc-orange-light: var(--btc-orange-light);
+  --color-btc-orange-dark: var(--btc-orange-dark);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-feature-settings: 'cv03', 'cv04', 'cv11';
+  line-height: 1.5;
+}
+
+/* BTC-inspired gradients */
+.gradient-bg {
+  background: linear-gradient(135deg, #f7931a 0%, #ffb347 100%);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #f7931a 0%, #e8841a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-alt {
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* BTC Logo styles */
+.btc-logo {
+  width: 2.5rem;
+  height: 2.5rem;
+  background: linear-gradient(135deg, #f7931a 0%, #e8841a 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 1.25rem;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(247, 147, 26, 0.4);
+}
+
+.btc-logo-lg {
+  width: 3.5rem;
+  height: 3.5rem;
+  font-size: 1.75rem;
+}
+
+/* Professional Icon Styles */
+.icon-lock {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-radius: 2px;
+  position: relative;
+  margin-right: 4px;
+}
+
+.icon-lock::before {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border: 2px solid currentColor;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  top: -6px;
+  left: 0;
+}
+
+.icon-shield {
+  display: inline-block;
+  width: 12px;
+  height: 14px;
+  background: currentColor;
+  clip-path: polygon(50% 0%, 0% 25%, 0% 75%, 50% 100%, 100% 75%, 100% 25%);
+  margin-right: 4px;
+}
+
+.icon-warning {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  background: currentColor;
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  margin-right: 4px;
+}
+
+.icon-circle {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  margin-right: 4px;
+}
+
+.icon-diamond {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: currentColor;
+  transform: rotate(45deg);
+  margin-right: 4px;
+}
+
+.icon-lightning {
+  display: inline-block;
+  width: 10px;
+  height: 14px;
+  background: currentColor;
+  clip-path: polygon(20% 0%, 80% 0%, 60% 40%, 100% 40%, 40% 100%, 0% 40%, 40% 40%);
+  margin-right: 4px;
+}
+
+/* Better shadows and card styling */
+.card-shadow {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.card-shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.card-shadow-btc {
+  box-shadow: 0 10px 15px -3px rgba(247, 147, 26, 0.1), 0 4px 6px -2px rgba(247, 147, 26, 0.05);
+}
+
+/* Improved hover effects */
+.hover-lift {
+  transition: all 0.2s ease-in-out;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.hover-lift-btc:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(247, 147, 26, 0.15), 0 10px 10px -5px rgba(247, 147, 26, 0.1);
+}
+
+/* Flow chart custom styling */
+.react-flow__node-custom {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-in-out;
+}
+
+.react-flow__node-custom:hover {
+  border-color: #f7931a;
+  box-shadow: 0 10px 15px -3px rgba(247, 147, 26, 0.1);
+  transform: translateY(-1px);
+}
+
+.react-flow__edge-path {
+  stroke: #f7931a;
+  stroke-width: 2;
+}
+
+.react-flow__edge.animated .react-flow__edge-path {
+  stroke-dasharray: 5;
+  animation: dashdraw 0.5s linear infinite;
+}
+
+@keyframes dashdraw {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
