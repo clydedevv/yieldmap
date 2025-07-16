@@ -1,175 +1,188 @@
 'use client';
 
-import React, { useCallback } from 'react';
-import {
-  ReactFlow,
-  Node,
-  Edge,
-  addEdge,
-  Connection,
-  useNodesState,
-  useEdgesState,
-  Controls,
-  Background,
-  Handle,
-  Position,
-} from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
-import { categoryNodes, mockStrategies } from '@/data/mockData';
-import { CategoryNode, Strategy } from '@/types/strategy';
-
-interface CustomNodeData {
-  label: string;
-  category?: string;
-  subcategory?: string;
-  strategies?: Strategy[];
-  onClick?: () => void;
-}
-
-const CustomNode = ({ data }: { data: CustomNodeData }) => {
-  return (
-    <div className="px-6 py-4 bg-white border-2 border-slate-200 rounded-xl min-w-[180px] text-center hover-lift-btc transition-all duration-200 hover:border-orange-400 hover:shadow-lg cursor-pointer">
-      <Handle type="target" position={Position.Top} />
-      <div 
-        className="text-sm font-bold text-slate-900 hover:text-orange-600 transition-colors"
-        onClick={data.onClick}
-      >
-        {data.label}
-      </div>
-      {data.strategies && data.strategies.length > 0 && (
-        <div className="text-xs text-slate-700 mt-2 bg-orange-50 px-2 py-1 rounded-full font-semibold">
-          {data.strategies.length} strategies
-        </div>
-      )}
-      <Handle type="source" position={Position.Bottom} />
-    </div>
-  );
-};
-
-const nodeTypes = {
-  custom: CustomNode,
-};
+import React, { useState, useMemo } from 'react';
+import { Strategy, StrategyCategory, RiskLevel } from '@/types/strategy';
+import { mockStrategies } from '@/data/mockData';
 
 interface FlowChartProps {
-  onNodeClick: (category?: string, subcategory?: string, strategies?: Strategy[]) => void;
+  onStrategySelect?: (strategy: Strategy) => void;
 }
 
-export default function FlowChart({ onNodeClick }: FlowChartProps) {
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+const categoryLabels: Record<StrategyCategory, string> = {
+  native_btc: 'Native BTC',
+  cex_lst: 'CEX LST',
+  onchain_lst: 'On-chain LST',
+  babylon_core: 'Security-as-a-Service',
+  l2_strategies: 'L2 Strategies'
+};
 
-  const initializeRootNodes = useCallback(() => {
-    const rootNode: Node = {
-      id: 'root',
-      type: 'custom',
-      position: { x: 400, y: 50 },
-      data: { 
-        label: 'BTC Yield Explorer',
-        onClick: () => {
-          // Will be handled in component
-        }
-      },
-    };
+const riskLevelLabels: Record<RiskLevel, string> = {
+  low: 'Low',
+  medium: 'Medium',
+  high: 'High'
+};
 
-    const categoryNodesList: Node[] = categoryNodes.map((cat, index) => ({
-      id: cat.id,
-      type: 'custom',
-      position: { x: 100 + (index * 200), y: 200 },
-      data: { 
-        label: cat.label,
-        category: cat.category,
-        onClick: () => handleCategoryClick(cat)
-      },
-    }));
+const riskLevelColors: Record<RiskLevel, string> = {
+  low: 'bg-green-100 text-green-800',
+  medium: 'bg-yellow-100 text-yellow-800',
+  high: 'bg-red-100 text-red-800'
+};
 
-    const categoryEdges: Edge[] = categoryNodes.map((cat) => ({
-      id: `root-${cat.id}`,
-      source: 'root',
-      target: cat.id,
-      animated: true,
-      style: { stroke: '#f7931a', strokeWidth: 2 },
-    }));
+export default function FlowChart({ onStrategySelect }: FlowChartProps) {
+  const [selectedCategory, setSelectedCategory] = useState<StrategyCategory | 'all'>('all');
+  const [selectedType, setSelectedType] = useState<string>('all');
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    setNodes([rootNode, ...categoryNodesList] as any);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    setEdges(categoryEdges as any);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handleCategoryClick = (category: CategoryNode) => {
-    if (category.children && category.children.length > 0) {
+  const filteredStrategies = useMemo(() => {
+    return mockStrategies.filter(strategy => {
+      const categoryMatch = selectedCategory === 'all' || strategy.category === selectedCategory;
+      const typeMatch = selectedType === 'all' || strategy.subcategory === selectedType;
       
-      const categoryNode: Node = {
-        id: category.id,
-        type: 'custom',
-        position: { x: 400, y: 50 },
-        data: { 
-          label: category.label,
-          onClick: () => initializeRootNodes()
-        },
-      };
+      return categoryMatch && typeMatch;
+    });
+  }, [selectedCategory, selectedType]);
 
-      const subcategoryNodes: Node[] = category.children.map((sub, index) => ({
-        id: `${category.id}-${sub.id}`,
-        type: 'custom',
-        position: { x: 100 + (index * 200), y: 200 },
-        data: { 
-          label: sub.label,
-          subcategory: sub.subcategory,
-          strategies: sub.strategies,
-          onClick: () => handleSubcategoryClick(category.category, sub.subcategory, sub.strategies)
-        },
-      }));
+  const categories = [
+    { id: 'all', label: 'All Categories' },
+    { id: 'native_btc', label: 'Native BTC' },
+    { id: 'cex_lst', label: 'CEX LST' },
+    { id: 'onchain_lst', label: 'On-chain LST' },
+    { id: 'babylon_core', label: 'Security-as-a-Service' },
+    { id: 'l2_strategies', label: 'L2 Strategies' }
+  ];
 
-      const subcategoryEdges: Edge[] = category.children.map((sub) => ({
-        id: `${category.id}-${sub.id}`,
-        source: category.id,
-        target: `${category.id}-${sub.id}`,
-        animated: true,
-        style: { stroke: '#f7931a', strokeWidth: 2 },
-      }));
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setNodes([categoryNode, ...subcategoryNodes] as any);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setEdges(subcategoryEdges as any);
-    } else {
-      const categoryStrategies = mockStrategies.filter(s => s.category === category.category);
-      onNodeClick(category.category, undefined, categoryStrategies);
-    }
-  };
-
-  const handleSubcategoryClick = (category: string, subcategory: string, strategies: Strategy[]) => {
-    onNodeClick(category, subcategory, strategies);
-  };
-
-  React.useEffect(() => {
-    initializeRootNodes();
-  }, [initializeRootNodes]);
-
-  const onConnect = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (params: Edge | Connection) => setEdges((eds: any) => addEdge(params, eds) as any),
-    [setEdges]
-  );
+  const types = [
+    { id: 'all', label: 'All Types' },
+    { id: 'dex_lp', label: 'DEX LP' },
+    { id: 'lending_lp', label: 'Lending LP' },
+    { id: 'perp_dex_lp', label: 'Perp DEX LP' },
+    { id: 'crosschain_lp', label: 'Cross-chain LP' }
+  ];
 
   return (
-    <div className="w-full h-96 border-2 border-orange-200 rounded-2xl overflow-hidden">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        nodeTypes={nodeTypes}
-        fitView
-        className="bg-gradient-to-br from-orange-50 to-amber-50"
-        proOptions={{ hideAttribution: true }}
-      >
-        <Controls className="bg-white/90 backdrop-blur-sm rounded-lg border border-orange-200" />
-        <Background color="#f7931a" gap={20} size={1} />
-      </ReactFlow>
+    <div className="w-full space-y-6">
+      {/* Categories and Filters Section */}
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+        <h3 className="text-lg font-bold text-slate-900 mb-4">Categories</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+          {categories.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => setSelectedCategory(category.id as StrategyCategory | 'all')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                selectedCategory === category.id
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              {category.label}
+            </button>
+          ))}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-2">Select Type</label>
+          <select
+            value={selectedType}
+            onChange={(e) => setSelectedType(e.target.value)}
+            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+          >
+            {types.map((type) => (
+              <option key={type.id} value={type.id}>
+                {type.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Strategies Table */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-slate-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  Strategy
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  Yield
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  Category
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  Risk
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  Lockup
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  Audit
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-slate-200">
+              {filteredStrategies.map((strategy) => (
+                <tr 
+                  key={strategy.id}
+                  className="hover:bg-slate-50 cursor-pointer transition-colors"
+                  onClick={() => onStrategySelect?.(strategy)}
+                >
+                  <td className="px-6 py-4">
+                    <div>
+                      <div className="text-sm font-medium text-slate-900">{strategy.name}</div>
+                      <div className="text-sm text-slate-500">{strategy.description}</div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm font-bold text-green-600">
+                      {strategy.yield_percent}%
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-slate-900">
+                      {categoryLabels[strategy.category]}
+                    </div>
+                    {strategy.subcategory && (
+                      <div className="text-xs text-slate-500 capitalize">
+                        {strategy.subcategory.replace('_', ' ')}
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${riskLevelColors[strategy.risk_level]}`}>
+                      {riskLevelLabels[strategy.risk_level]}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-slate-900">
+                      {strategy.lockup_period_days === 0 ? 'None' : `${strategy.lockup_period_days} days`}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center">
+                      {strategy.is_audited ? (
+                        <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                          ✓ Audited
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                          ✗ Not Audited
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Results Count */}
+      <div className="text-sm text-slate-600">
+        Showing {filteredStrategies.length} of {mockStrategies.length} strategies
+      </div>
     </div>
   );
 }

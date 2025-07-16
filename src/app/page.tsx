@@ -57,30 +57,19 @@ export default function Home() {
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <div className="lg:col-span-3">
-            <div className="mb-8">
-              <h2 className="text-4xl font-bold text-slate-900 mb-6">
-                Navigate Yield Opportunities
-              </h2>
-              <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 card-shadow-btc border border-orange-100">
-                <FlowChart onNodeClick={handleNodeClick} />
+            <div className="bg-white/90 backdrop-blur-sm rounded-3xl card-shadow-btc p-6 border border-orange-100">
+              <div className="flex items-center mb-6">
+                <div className="btc-logo mr-3">
+                  ₿
+                </div>
+                <h2 className="text-2xl font-bold text-slate-900">
+                  <span className="gradient-text">Navigate Yield Opportunities</span>
+                </h2>
               </div>
+              <FlowChart onStrategySelect={handleStrategyClick} />
             </div>
 
-            {breadcrumb && (
-              <div className="mb-8">
-                <nav className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 card-shadow-lg border border-slate-200">
-                  <div className="flex items-center">
-                    <div className="btc-logo mr-3">
-                      ₿
-                    </div>
-                    <div>
-                      <span className="text-sm font-bold text-slate-900 block">Current Selection</span>
-                      <span className="text-lg text-slate-700 font-semibold">{breadcrumb}</span>
-                    </div>
-                  </div>
-                </nav>
-              </div>
-            )}
+
 
             <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 card-shadow-btc border border-orange-100">
               <StrategyList 
