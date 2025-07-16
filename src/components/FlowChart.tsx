@@ -15,7 +15,6 @@ import {
   Position,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { categoryNodes, mockStrategies } from '@/data/mockData';
 import { CategoryNode, Strategy } from '@/types/strategy';
 
 interface CustomNodeData {
@@ -52,9 +51,11 @@ const nodeTypes = {
 
 interface FlowChartProps {
   onNodeClick: (category?: string, subcategory?: string, strategies?: Strategy[]) => void;
+  categoryNodes: CategoryNode[];
+  allStrategies: Strategy[];
 }
 
-export default function FlowChart({ onNodeClick }: FlowChartProps) {
+export default function FlowChart({ onNodeClick, categoryNodes, allStrategies }: FlowChartProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
@@ -135,7 +136,7 @@ export default function FlowChart({ onNodeClick }: FlowChartProps) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setEdges(subcategoryEdges as any);
     } else {
-      const categoryStrategies = mockStrategies.filter(s => s.category === category.category);
+      const categoryStrategies = allStrategies.filter(s => s.category === category.category);
       onNodeClick(category.category, undefined, categoryStrategies);
     }
   };

@@ -1,15 +1,14 @@
 'use client';
 
 import React from 'react';
-import { getTopStrategies } from '@/data/mockData';
 import { Strategy } from '@/types/strategy';
 
 interface TopYieldSidebarProps {
   onStrategyClick: (strategy: Strategy) => void;
+  topStrategies: Strategy[];
 }
 
-export default function TopYieldSidebar({ onStrategyClick }: TopYieldSidebarProps) {
-  const topStrategies = getTopStrategies(5);
+export default function TopYieldSidebar({ onStrategyClick, topStrategies }: TopYieldSidebarProps) {
 
   return (
     <div className="bg-white/90 backdrop-blur-sm rounded-3xl card-shadow-btc p-6 sticky top-4 border border-orange-100">
