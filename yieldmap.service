@@ -1,0 +1,29 @@
+[Unit]
+Description=BTC Yield Explorer - YieldMap Application
+Documentation=https://github.com/your-repo/yieldmap
+After=network.target
+
+[Service]
+Type=simple
+User=cosmos
+WorkingDirectory=/home/cosmos/yieldmap
+Environment=NODE_ENV=production
+Environment=PORT=3001
+ExecStart=/usr/bin/npm start
+Restart=on-failure
+RestartSec=10
+KillMode=process
+
+# Output to journald
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=yieldmap
+
+# Security settings
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ReadWritePaths=/home/cosmos/yieldmap
+
+[Install]
+WantedBy=multi-user.target 

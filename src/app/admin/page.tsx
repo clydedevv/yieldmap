@@ -241,6 +241,8 @@ export default function AdminPage() {
                     category: 'native_btc',
                     name: '',
                     yield_percent: 0,
+                    min_yield_percent: undefined,
+                    max_yield_percent: undefined,
                     description: '',
                     entry_guide: '',
                     notes: '',
@@ -439,6 +441,35 @@ function StrategyEditForm({ strategy, isCreating = false, onSave, onCancel }: St
           className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-slate-900 font-medium bg-white"
           required
         />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-semibold text-slate-900 mb-2">
+            Min Yield % (Optional)
+          </label>
+          <input
+            type="number"
+            step="0.1"
+            value={formData.min_yield_percent || ''}
+            onChange={(e) => handleChange('min_yield_percent', e.target.value ? parseFloat(e.target.value) : undefined)}
+            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-slate-900 font-medium bg-white"
+            placeholder="e.g., 5.0"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-slate-900 mb-2">
+            Max Yield % (Optional)
+          </label>
+          <input
+            type="number"
+            step="0.1"
+            value={formData.max_yield_percent || ''}
+            onChange={(e) => handleChange('max_yield_percent', e.target.value ? parseFloat(e.target.value) : undefined)}
+            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-slate-900 font-medium bg-white"
+            placeholder="e.g., 8.0"
+          />
+        </div>
       </div>
 
       <div>

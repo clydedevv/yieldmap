@@ -4,6 +4,14 @@ import React, { useState, useMemo, forwardRef, useImperativeHandle, useRef, useE
 import { Strategy, StrategyCategory, RiskLevel } from '@/types/strategy';
 import { StrategyAPI } from '@/lib/api';
 
+// Helper function to format yield display
+const formatYieldDisplay = (strategy: Strategy): string => {
+  if (strategy.min_yield_percent && strategy.max_yield_percent) {
+    return `${strategy.min_yield_percent}% - ${strategy.max_yield_percent}%`;
+  }
+  return `${strategy.yield_percent}%`;
+};
+
 interface FlowChartProps {
   onStrategySelect?: (strategy: Strategy) => void;
   onNodeClick?: (category?: string, subcategory?: string, strategies?: Strategy[]) => void;
@@ -85,7 +93,7 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ onStrategySelect, 
       setTimeout(() => {
         setExpandedRows(new Set([...expandedRows].filter(id => id !== strategyId)));
         setAnimatingRows(new Set([...animatingRows].filter(id => id !== strategyId)));
-      }, 300);
+      }, 400);
     } else {
       // Start expand animation
       setExpandedRows(new Set([...expandedRows, strategyId]));
@@ -221,7 +229,7 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ onStrategySelect, 
                   </div>
                 </th>
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors"
+                  className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors w-28"
                   onClick={() => handleSort('yield_percent')}
                 >
                   <div className="flex items-center">
@@ -288,9 +296,9 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ onStrategySelect, 
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-bold text-green-600">
-                        {strategy.yield_percent}%
+                    <td className="px-6 py-4 w-28">
+                      <div className="text-sm font-bold text-green-600 whitespace-nowrap">
+                        {formatYieldDisplay(strategy)}
                       </div>
                     </td>
                     <td className="px-6 py-4">

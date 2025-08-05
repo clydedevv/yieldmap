@@ -3,6 +3,14 @@
 import React from 'react';
 import { Strategy } from '@/types/strategy';
 
+// Helper function to format yield display
+const formatYieldDisplay = (strategy: Strategy): string => {
+  if (strategy.min_yield_percent && strategy.max_yield_percent) {
+    return `${strategy.min_yield_percent}% - ${strategy.max_yield_percent}%`;
+  }
+  return `${strategy.yield_percent.toFixed(1)}%`;
+};
+
 interface TopYieldSidebarProps {
   onStrategyClick: (strategy: Strategy) => void;
   topStrategies: Strategy[];
@@ -34,7 +42,7 @@ export default function TopYieldSidebar({ onStrategyClick, topStrategies }: TopY
               </span>
               <div className="flex items-center">
                 <span className="text-lg font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
-                  {strategy.yield_percent.toFixed(1)}%
+                  {formatYieldDisplay(strategy)}
                 </span>
               </div>
             </div>

@@ -25,6 +25,8 @@ export function initDatabase() {
         subcategory TEXT,
         name TEXT NOT NULL,
         yield_percent REAL NOT NULL,
+        min_yield_percent REAL,
+        max_yield_percent REAL,
         description TEXT NOT NULL,
         entry_guide TEXT NOT NULL,
         notes TEXT,
@@ -139,16 +141,18 @@ export function createStrategy(strategy: Omit<Strategy, 'last_updated_at'> & { i
     // Insert strategy
     database.prepare(`
       INSERT INTO strategies (
-        id, category, subcategory, name, yield_percent, description, 
+        id, category, subcategory, name, yield_percent, min_yield_percent, max_yield_percent, description, 
         entry_guide, notes, url, lockup_period_days, is_audited, audit_url, 
         risk_level, is_active
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       strategyData.id,
       strategyData.category,
       strategyData.subcategory || null,
       strategyData.name,
       strategyData.yield_percent,
+      strategyData.min_yield_percent || null,
+      strategyData.max_yield_percent || null,
       strategyData.description,
       strategyData.entry_guide,
       strategyData.notes || null,
@@ -218,6 +222,14 @@ export function updateStrategy(id: string, updates: Partial<Strategy> & { is_act
     if (strategyUpdates.yield_percent !== undefined) {
       fields.push('yield_percent = ?');
       values.push(strategyUpdates.yield_percent);
+    }
+    if (strategyUpdates.min_yield_percent !== undefined) {
+      fields.push('min_yield_percent = ?');
+      values.push(strategyUpdates.min_yield_percent);
+    }
+    if (strategyUpdates.max_yield_percent !== undefined) {
+      fields.push('max_yield_percent = ?');
+      values.push(strategyUpdates.max_yield_percent);
     }
     if (strategyUpdates.description !== undefined) {
       fields.push('description = ?');

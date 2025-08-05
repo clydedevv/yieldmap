@@ -32,6 +32,8 @@ export interface Strategy {
   subcategory?: StrategySubcategory;
   name: string;
   yield_percent: number;
+  min_yield_percent?: number;  // For ranges
+  max_yield_percent?: number;  // For ranges
   description: string;
   entry_guide: string;
   notes?: string;
