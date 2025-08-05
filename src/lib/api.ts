@@ -4,12 +4,29 @@ const API_BASE = '/api';
 
 export class StrategyAPI {
   static async getAllStrategies(activeOnly: boolean = true): Promise<Strategy[]> {
-    const response = await fetch(`${API_BASE}/strategies?active=${activeOnly}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch strategies');
+    try {
+      console.log('Fetching strategies from:', `${API_BASE}/strategies?active=${activeOnly}`);
+      const response = await fetch(`${API_BASE}/strategies?active=${activeOnly}`);
+      console.log('Response status:', response.status, response.statusText);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API Error Response:', errorText);
+        throw new Error(`Failed to fetch strategies: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('API Response data:', data);
+      
+      if (!data.strategies || !Array.isArray(data.strategies)) {
+        throw new Error('Invalid response format: strategies array not found');
+      }
+      
+      return data.strategies;
+    } catch (error) {
+      console.error('StrategyAPI.getAllStrategies error:', error);
+      throw error;
     }
-    const data = await response.json();
-    return data.strategies;
   }
 
   static async getStrategy(id: string): Promise<Strategy> {

@@ -17,11 +17,14 @@ export default function AdminPage() {
   const loadStrategies = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
+      console.log('Loading strategies, showActiveOnly:', showActiveOnly, 'calling API with:', !showActiveOnly);
       const data = await StrategyAPI.getAllStrategies(!showActiveOnly); // Invert logic: false = show all
+      console.log('Loaded strategies:', data.length);
       setStrategies(data);
     } catch (err) {
-      setError('Failed to load strategies');
-      console.error(err);
+      console.error('Error loading strategies:', err);
+      setError(`Failed to load strategies: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
