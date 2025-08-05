@@ -20,6 +20,12 @@ export interface YieldSource {
   description?: string;
 }
 
+export interface Chain {
+  name: string;
+  icon: string; // emoji or icon identifier
+  color: string; // hex color for the chain
+}
+
 export interface Strategy {
   id: string;
   category: StrategyCategory;
@@ -28,6 +34,7 @@ export interface Strategy {
   yield_percent: number;
   description: string;
   entry_guide: string;
+  notes?: string;
   last_updated_at: Date;
   url?: string;
   
@@ -37,6 +44,7 @@ export interface Strategy {
   audit_url?: string;
   risk_level: RiskLevel;
   yield_sources: YieldSource[];
+  chains: Chain[];
 }
 
 export interface CategoryNode {

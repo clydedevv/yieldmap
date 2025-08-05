@@ -243,9 +243,12 @@ export default function AdminPage() {
                     yield_percent: 0,
                     description: '',
                     entry_guide: '',
+                    notes: '',
                     risk_level: 'medium',
                     is_audited: false,
                     yield_sources: [],
+                    chains: [],
+                    lockup_period_days: 0,
                     last_updated_at: new Date()
                   } as Strategy}
                   isCreating={isCreating}
@@ -304,7 +307,13 @@ interface StrategyEditFormProps {
 }
 
 function StrategyEditForm({ strategy, isCreating = false, onSave, onCancel }: StrategyEditFormProps) {
-  const [formData, setFormData] = useState<Strategy>(strategy);
+  const [formData, setFormData] = useState<Strategy>({
+    ...strategy,
+    chains: strategy.chains || [],
+    notes: strategy.notes || '',
+    yield_sources: strategy.yield_sources || [],
+    lockup_period_days: strategy.lockup_period_days || 0
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -344,8 +353,31 @@ function StrategyEditForm({ strategy, isCreating = false, onSave, onCancel }: St
     }));
   };
 
+  const addChain = () => {
+    setFormData(prev => ({
+      ...prev,
+      chains: [...prev.chains, { name: '', icon: '🔗', color: '#6366f1' }]
+    }));
+  };
+
+  const removeChain = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      chains: prev.chains.filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateChain = (index: number, field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      chains: prev.chains.map((chain, i) => 
+        i === index ? { ...chain, [field]: value } : chain
+      )
+    }));
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
       <div>
         <label className="block text-sm font-semibold text-slate-900 mb-2">
           Strategy Name
@@ -437,6 +469,19 @@ function StrategyEditForm({ strategy, isCreating = false, onSave, onCancel }: St
 
       <div>
         <label className="block text-sm font-semibold text-slate-900 mb-2">
+          Research Notes (optional)
+        </label>
+        <textarea
+          value={formData.notes || ''}
+          onChange={(e) => handleChange('notes', e.target.value)}
+          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-slate-900 font-medium bg-white"
+          rows={2}
+          placeholder="Add research notes about this strategy..."
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold text-slate-900 mb-2">
           Protocol URL (optional)
         </label>
         <input
@@ -454,7 +499,7 @@ function StrategyEditForm({ strategy, isCreating = false, onSave, onCancel }: St
         <input
           type="number"
           value={formData.lockup_period_days || 0}
-          onChange={(e) => handleChange('lockup_period_days', parseInt(e.target.value) || undefined)}
+          onChange={(e) => handleChange('lockup_period_days', parseInt(e.target.value) || 0)}
           className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-slate-900 font-medium bg-white"
         />
       </div>
@@ -504,6 +549,52 @@ function StrategyEditForm({ strategy, isCreating = false, onSave, onCancel }: St
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="block text-sm font-semibold text-slate-900">
+            Supported Chains
+          </label>
+          <button
+            type="button"
+            onClick={addChain}
+            className="text-orange-600 hover:text-orange-800 text-sm font-medium"
+          >
+            + Add Chain
+          </button>
+        </div>
+        {formData.chains.map((chain, index) => (
+          <div key={index} className="flex space-x-2 mb-2">
+            <input
+              type="text"
+              placeholder="Chain Name (e.g., Ethereum)"
+              value={chain.name}
+              onChange={(e) => updateChain(index, 'name', e.target.value)}
+              className="flex-1 px-2 py-1 border border-slate-300 rounded text-sm text-slate-900 font-medium bg-white"
+            />
+            <input
+              type="text"
+              placeholder="Icon (e.g., ⟡)"
+              value={chain.icon}
+              onChange={(e) => updateChain(index, 'icon', e.target.value)}
+              className="w-16 px-2 py-1 border border-slate-300 rounded text-sm text-slate-900 font-medium bg-white"
+            />
+            <input
+              type="color"
+              value={chain.color}
+              onChange={(e) => updateChain(index, 'color', e.target.value)}
+              className="w-12 h-8 border border-slate-300 rounded"
+            />
+            <button
+              type="button"
+              onClick={() => removeChain(index)}
+              className="text-red-600 hover:text-red-800 px-2"
+            >
+              ×
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-semibold text-slate-900">
             Yield Sources
           </label>
           <button
@@ -511,14 +602,14 @@ function StrategyEditForm({ strategy, isCreating = false, onSave, onCancel }: St
             onClick={addYieldSource}
             className="text-orange-600 hover:text-orange-800 text-sm font-medium"
           >
-            + Add
+            + Add Source
           </button>
         </div>
         {formData.yield_sources.map((source, index) => (
           <div key={index} className="flex space-x-2 mb-2">
             <input
               type="text"
-              placeholder="Name"
+              placeholder="Source Name"
               value={source.name}
               onChange={(e) => updateYieldSource(index, 'name', e.target.value)}
               className="flex-1 px-2 py-1 border border-slate-300 rounded text-sm text-slate-900 font-medium bg-white"

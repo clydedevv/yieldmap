@@ -42,6 +42,11 @@ export async function POST(request: NextRequest) {
       body.yield_sources = [];
     }
     
+    // Ensure chains is an array
+    if (!body.chains || !Array.isArray(body.chains)) {
+      body.chains = [];
+    }
+    
     const strategy = createStrategy(body);
     return NextResponse.json({ strategy }, { status: 201 });
   } catch (error) {

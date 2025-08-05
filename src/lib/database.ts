@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3';
 import path from 'path';
-import { Strategy, YieldSource } from '@/types/strategy';
+import { Strategy, YieldSource, Chain } from '@/types/strategy';
 
 const dbPath = path.join(process.cwd(), 'data', 'strategies.db');
 let db: Database.Database;
@@ -27,6 +27,7 @@ export function initDatabase() {
         yield_percent REAL NOT NULL,
         description TEXT NOT NULL,
         entry_guide TEXT NOT NULL,
+        notes TEXT,
         url TEXT,
         lockup_period_days INTEGER,
         is_audited BOOLEAN DEFAULT 0,
@@ -46,9 +47,19 @@ export function initDatabase() {
         FOREIGN KEY (strategy_id) REFERENCES strategies (id) ON DELETE CASCADE
       );
 
+      CREATE TABLE IF NOT EXISTS chains (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        strategy_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        icon TEXT NOT NULL,
+        color TEXT NOT NULL,
+        FOREIGN KEY (strategy_id) REFERENCES strategies (id) ON DELETE CASCADE
+      );
+
       CREATE INDEX IF NOT EXISTS idx_strategies_category ON strategies(category);
       CREATE INDEX IF NOT EXISTS idx_strategies_active ON strategies(is_active);
       CREATE INDEX IF NOT EXISTS idx_yield_sources_strategy ON yield_sources(strategy_id);
+      CREATE INDEX IF NOT EXISTS idx_chains_strategy ON chains(strategy_id);
     `);
 
     console.log('Database initialized successfully');
@@ -81,11 +92,17 @@ export function getAllStrategies(activeOnly: boolean = true): Strategy[] {
     SELECT name, icon, description FROM yield_sources WHERE strategy_id = ?
   `);
   
+  // Get chains for each strategy
+  const getChains = database.prepare(`
+    SELECT name, icon, color FROM chains WHERE strategy_id = ?
+  `);
+  
   return strategies.map(strategy => ({
     ...strategy,
     last_updated_at: new Date(strategy.last_updated_at),
     is_audited: Boolean(strategy.is_audited),
-    yield_sources: getYieldSources.all(strategy.id) as YieldSource[]
+    yield_sources: getYieldSources.all(strategy.id) as YieldSource[],
+    chains: getChains.all(strategy.id) as Chain[]
   }));
 }
 
@@ -102,11 +119,16 @@ export function getStrategyById(id: string): Strategy | null {
     SELECT name, icon, description FROM yield_sources WHERE strategy_id = ?
   `).all(id) as YieldSource[];
   
+  const chains = database.prepare(`
+    SELECT name, icon, color FROM chains WHERE strategy_id = ?
+  `).all(id) as Chain[];
+  
   return {
     ...strategy,
     last_updated_at: new Date(strategy.last_updated_at),
     is_audited: Boolean(strategy.is_audited),
-    yield_sources: yieldSources
+    yield_sources: yieldSources,
+    chains: chains
   };
 }
 
@@ -118,9 +140,9 @@ export function createStrategy(strategy: Omit<Strategy, 'last_updated_at'> & { i
     database.prepare(`
       INSERT INTO strategies (
         id, category, subcategory, name, yield_percent, description, 
-        entry_guide, url, lockup_period_days, is_audited, audit_url, 
+        entry_guide, notes, url, lockup_period_days, is_audited, audit_url, 
         risk_level, is_active
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       strategyData.id,
       strategyData.category,
@@ -129,6 +151,7 @@ export function createStrategy(strategy: Omit<Strategy, 'last_updated_at'> & { i
       strategyData.yield_percent,
       strategyData.description,
       strategyData.entry_guide,
+      strategyData.notes || null,
       strategyData.url || null,
       strategyData.lockup_period_days || null,
       strategyData.is_audited ? 1 : 0,
@@ -149,6 +172,21 @@ export function createStrategy(strategy: Omit<Strategy, 'last_updated_at'> & { i
         source.name,
         source.icon,
         source.description || null
+      );
+    });
+    
+    // Insert chains
+    const insertChain = database.prepare(`
+      INSERT INTO chains (strategy_id, name, icon, color)
+      VALUES (?, ?, ?, ?)
+    `);
+    
+    strategyData.chains.forEach((chain: Chain) => {
+      insertChain.run(
+        strategyData.id,
+        chain.name,
+        chain.icon,
+        chain.color
       );
     });
   });
@@ -188,6 +226,10 @@ export function updateStrategy(id: string, updates: Partial<Strategy> & { is_act
     if (strategyUpdates.entry_guide !== undefined) {
       fields.push('entry_guide = ?');
       values.push(strategyUpdates.entry_guide);
+    }
+    if (strategyUpdates.notes !== undefined) {
+      fields.push('notes = ?');
+      values.push(strategyUpdates.notes);
     }
     if (strategyUpdates.url !== undefined) {
       fields.push('url = ?');
@@ -240,6 +282,27 @@ export function updateStrategy(id: string, updates: Partial<Strategy> & { is_act
           source.name,
           source.icon,
           source.description || null
+        );
+      });
+    }
+    
+    // Update chains if provided
+    if (strategyUpdates.chains) {
+      // Delete existing chains
+      database.prepare('DELETE FROM chains WHERE strategy_id = ?').run(strategyId);
+      
+      // Insert new chains
+      const insertChain = database.prepare(`
+        INSERT INTO chains (strategy_id, name, icon, color)
+        VALUES (?, ?, ?, ?)
+      `);
+      
+      strategyUpdates.chains.forEach((chain: Chain) => {
+        insertChain.run(
+          strategyId,
+          chain.name,
+          chain.icon,
+          chain.color
         );
       });
     }
