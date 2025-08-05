@@ -6,8 +6,8 @@ export function migrateDatabase() {
   try {
     // Check if columns already exist
     const tableInfo = db.prepare("PRAGMA table_info(strategies)").all();
-    const hasMinYield = tableInfo.some((col: any) => col.name === 'min_yield_percent');
-    const hasMaxYield = tableInfo.some((col: any) => col.name === 'max_yield_percent');
+    const hasMinYield = (tableInfo as { name: string }[]).some(col => col.name === 'min_yield_percent');
+    const hasMaxYield = (tableInfo as { name: string }[]).some(col => col.name === 'max_yield_percent');
     
     if (!hasMinYield) {
       console.log('Adding min_yield_percent column...');

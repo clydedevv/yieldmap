@@ -1,5 +1,6 @@
 import Database from 'better-sqlite3';
 import path from 'path';
+import fs from 'fs';
 import { Strategy, YieldSource, Chain } from '@/types/strategy';
 
 const dbPath = path.join(process.cwd(), 'data', 'strategies.db');
@@ -9,7 +10,6 @@ let db: Database.Database;
 export function initDatabase() {
   try {
     // Create data directory if it doesn't exist
-    const fs = require('fs');
     const dataDir = path.join(process.cwd(), 'data');
     if (!fs.existsSync(dataDir)) {
       fs.mkdirSync(dataDir, { recursive: true });
@@ -87,7 +87,7 @@ export function getAllStrategies(activeOnly: boolean = true): Strategy[] {
     ? `SELECT * FROM strategies WHERE is_active = 1 ORDER BY yield_percent DESC`
     : `SELECT * FROM strategies ORDER BY yield_percent DESC`;
   
-  const strategies = database.prepare(query).all() as any[];
+  const strategies = database.prepare(query).all() as (Strategy & { is_active?: boolean })[];
   
   // Get yield sources for each strategy
   const getYieldSources = database.prepare(`
@@ -113,7 +113,7 @@ export function getStrategyById(id: string): Strategy | null {
   
   const strategy = database.prepare(`
     SELECT * FROM strategies WHERE id = ?
-  `).get(id) as any;
+  `).get(id) as (Strategy & { is_active?: boolean }) | undefined;
   
   if (!strategy) return null;
   
@@ -137,7 +137,7 @@ export function getStrategyById(id: string): Strategy | null {
 export function createStrategy(strategy: Omit<Strategy, 'last_updated_at'> & { is_active?: boolean }): Strategy {
   const database = getDatabase();
   
-  const transaction = database.transaction((strategyData: any) => {
+  const transaction = database.transaction((strategyData: Strategy & { is_active?: boolean }) => {
     // Insert strategy
     database.prepare(`
       INSERT INTO strategies (
@@ -195,14 +195,18 @@ export function createStrategy(strategy: Omit<Strategy, 'last_updated_at'> & { i
     });
   });
   
-  transaction(strategy);
+  const strategyWithTimestamp = {
+    ...strategy,
+    last_updated_at: new Date()
+  };
+  transaction(strategyWithTimestamp);
   return getStrategyById(strategy.id)!;
 }
 
 export function updateStrategy(id: string, updates: Partial<Strategy> & { is_active?: boolean }): Strategy | null {
   const database = getDatabase();
   
-  const transaction = database.transaction((strategyId: string, strategyUpdates: any) => {
+  const transaction = database.transaction((strategyId: string, strategyUpdates: Partial<Strategy> & { is_active?: boolean }) => {
     // Build dynamic update query
     const fields = [];
     const values = [];
@@ -337,7 +341,7 @@ export function toggleStrategyVisibility(id: string): Strategy | null {
   const strategy = getStrategyById(id);
   if (!strategy) return null;
   
-  const newActiveState = !(strategy as any).is_active;
+  const newActiveState = !(strategy as Strategy & { is_active?: boolean }).is_active;
   database.prepare('UPDATE strategies SET is_active = ?, last_updated_at = CURRENT_TIMESTAMP WHERE id = ?')
     .run(newActiveState ? 1 : 0, id);
   

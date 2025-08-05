@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import FlowChart from '@/components/FlowChart';
-import StrategyList from '@/components/StrategyList';
 import TopYieldSidebar from '@/components/TopYieldSidebar';
 import { Strategy, CategoryNode } from '@/types/strategy';
 
@@ -13,20 +12,7 @@ interface ClientHomePageProps {
 }
 
 export default function ClientHomePage({ categoryNodes, allStrategies, topStrategies }: ClientHomePageProps) {
-  const [selectedStrategies, setSelectedStrategies] = useState<Strategy[]>([]);
-  const [breadcrumb, setBreadcrumb] = useState<string>('');
   const flowChartRef = useRef<{ expandAndScrollToStrategy: (strategyId: string) => void }>(null);
-
-  const handleNodeClick = (category?: string, subcategory?: string, strategies?: Strategy[]) => {
-    if (strategies) {
-      setSelectedStrategies(strategies);
-      let crumb = category || '';
-      if (subcategory) {
-        crumb += ` > ${subcategory}`;
-      }
-      setBreadcrumb(crumb);
-    }
-  };
 
   const handleStrategyClick = (strategy: Strategy) => {
     // Expand the strategy in the table and scroll to it

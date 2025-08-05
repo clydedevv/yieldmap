@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { Strategy } from '@/types/strategy';
 import { StrategyAPI } from '@/lib/api';
 
 export default function AdminPage() {
   const [strategies, setStrategies] = useState<Strategy[]>([]);
-  const [allStrategies, setAllStrategies] = useState<Strategy[]>([]);
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -14,25 +14,22 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadStrategies();
-  }, [showActiveOnly]);
-
-  const loadStrategies = async () => {
+  const loadStrategies = useCallback(async () => {
     try {
       setLoading(true);
       const data = await StrategyAPI.getAllStrategies(!showActiveOnly); // Invert logic: false = show all
       setStrategies(data);
-      if (!showActiveOnly) {
-        setAllStrategies(data);
-      }
     } catch (err) {
       setError('Failed to load strategies');
       console.error(err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [showActiveOnly]);
+
+  useEffect(() => {
+    loadStrategies();
+  }, [loadStrategies]);
 
   const handleEdit = (strategy: Strategy) => {
     setSelectedStrategy(strategy);
@@ -91,11 +88,11 @@ export default function AdminPage() {
     setSelectedStrategy(null);
   };
 
-  const getStrategyStatus = (strategy: any) => {
+  const getStrategyStatus = (strategy: Strategy & { is_active?: boolean }) => {
     return strategy.is_active ? 'Active' : 'Hidden';
   };
 
-  const getStatusColor = (strategy: any) => {
+  const getStatusColor = (strategy: Strategy & { is_active?: boolean }) => {
     return strategy.is_active 
       ? 'bg-green-100 text-green-800' 
       : 'bg-red-100 text-red-800';
@@ -131,9 +128,9 @@ export default function AdminPage() {
               >
                 + Add Strategy
               </button>
-              <a href="/" className="text-blue-600 hover:text-blue-800 font-medium">
+              <Link href="/" className="text-blue-600 hover:text-blue-800 font-medium">
                 ← Back to Main App
-              </a>
+              </Link>
             </div>
           </div>
           
@@ -192,12 +189,12 @@ export default function AdminPage() {
                         <button
                           onClick={() => handleToggleVisibility(strategy)}
                           className={`text-xs font-medium px-3 py-1 rounded-full transition-colors ${
-                            (strategy as any).is_active 
+                            (strategy as Strategy & { is_active?: boolean }).is_active 
                               ? 'text-red-600 bg-red-50 hover:bg-red-100' 
                               : 'text-green-600 bg-green-50 hover:bg-green-100'
                           }`}
                         >
-                          {(strategy as any).is_active ? 'Hide' : 'Show'}
+                          {(strategy as Strategy & { is_active?: boolean }).is_active ? 'Hide' : 'Show'}
                         </button>
                         <button
                           onClick={() => handleEdit(strategy)}
@@ -264,10 +261,10 @@ export default function AdminPage() {
                       <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm3 5a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zm0 3a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1z" clipRule="evenodd" />
                     </svg>
                   </div>
-                  <p className="text-slate-600 mb-4">Click "Edit" on any strategy to modify it, or click "Add Strategy" to create a new one.</p>
+                  <p className="text-slate-600 mb-4">Click &ldquo;Edit&rdquo; on any strategy to modify it, or click &ldquo;Add Strategy&rdquo; to create a new one.</p>
                   <div className="bg-orange-50 p-4 rounded-lg">
                     <h4 className="font-semibold text-orange-800 mb-2">Strategy Visibility</h4>
-                    <p className="text-sm text-orange-700">Use "Show/Hide" buttons to control which strategies appear on the main site.</p>
+                    <p className="text-sm text-orange-700">Use &ldquo;Show/Hide&rdquo; buttons to control which strategies appear on the main site.</p>
                   </div>
                 </div>
               )}
@@ -288,12 +285,12 @@ export default function AdminPage() {
             <li>✅ Create, edit, and delete strategies</li>
           </ul>
           <div className="flex items-center space-x-4">
-            <a href="/api/strategies" className="text-orange-600 hover:text-orange-800 font-medium">
+            <Link href="/api/strategies" className="text-orange-600 hover:text-orange-800 font-medium">
               View API Endpoints →
-            </a>
-            <a href="/" className="text-blue-600 hover:text-blue-800 font-medium">
+            </Link>
+            <Link href="/" className="text-blue-600 hover:text-blue-800 font-medium">
               ← Back to Main App
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -325,7 +322,7 @@ function StrategyEditForm({ strategy, isCreating = false, onSave, onCancel }: St
     });
   };
 
-  const handleChange = (field: keyof Strategy, value: any) => {
+  const handleChange = (field: keyof Strategy, value: string | number | boolean | undefined) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -541,7 +538,7 @@ function StrategyEditForm({ strategy, isCreating = false, onSave, onCancel }: St
         </label>
         <select
           value={formData.risk_level}
-          onChange={(e) => handleChange('risk_level', e.target.value as any)}
+          onChange={(e) => handleChange('risk_level', e.target.value as 'low' | 'medium' | 'high')}
           className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-slate-900 font-medium bg-white"
         >
           <option value="low">Low</option>

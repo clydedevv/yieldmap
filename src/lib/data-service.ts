@@ -14,7 +14,7 @@ export async function getCategoryNodes(): Promise<CategoryNode[]> {
         {
           id: 'native_btc_all',
           label: 'All Native BTC',
-          subcategory: 'dex_lp' as any, // This is a workaround for the type system
+          subcategory: undefined,
           strategies: strategies.filter(s => s.category === 'native_btc')
         }
       ]
@@ -27,7 +27,7 @@ export async function getCategoryNodes(): Promise<CategoryNode[]> {
         {
           id: 'cex_lst_all',
           label: 'All CEX LST',
-          subcategory: 'dex_lp' as any, // This is a workaround for the type system
+          subcategory: undefined,
           strategies: strategies.filter(s => s.category === 'cex_lst')
         }
       ]
@@ -77,7 +77,7 @@ export async function getCategoryNodes(): Promise<CategoryNode[]> {
         {
           id: 'babylon_core_all',
           label: 'All Babylon Core',
-          subcategory: 'dex_lp' as any, // This is a workaround for the type system
+          subcategory: undefined,
           strategies: strategies.filter(s => s.category === 'babylon_core')
         }
       ]

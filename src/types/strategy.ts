@@ -59,6 +59,6 @@ export interface CategoryNode {
 export interface SubcategoryNode {
   id: string;
   label: string;
-  subcategory: StrategySubcategory;
+  subcategory?: StrategySubcategory;
   strategies: Strategy[];
 }

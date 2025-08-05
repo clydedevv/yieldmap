@@ -33,72 +33,38 @@ body {
   line-height: 1.5;
 }
 
-/* Smooth dropdown animations */
-@keyframes expandRow {
-  from {
-    opacity: 0;
-    max-height: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    max-height: 600px;
-    transform: translateY(0);
-  }
+/* Smooth table row animations */
+.table-row-expand {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
-@keyframes collapseRow {
-  from {
-    opacity: 1;
-    max-height: 600px;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    max-height: 0;
-    transform: translateY(-10px);
-  }
+.table-row-collapse {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
+/* Fade animations for content */
 @keyframes fadeIn {
   from {
     opacity: 0;
+    transform: translateY(-8px);
   }
   to {
     opacity: 1;
+    transform: translateY(0);
   }
 }
 
 @keyframes fadeOut {
   from {
     opacity: 1;
+    transform: translateY(0);
   }
   to {
     opacity: 0;
+    transform: translateY(-8px);
   }
-}
-
-.dropdown-enter {
-  opacity: 0;
-  max-height: 0;
-  transform: translateY(-10px);
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  overflow: hidden;
-  animation: expandRow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-.dropdown-exit {
-  opacity: 1;
-  max-height: 600px;
-  transform: translateY(0);
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  overflow: hidden;
-  animation: collapseRow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-.dropdown-content {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  transform-origin: top;
 }
 
 /* BTC-inspired gradients */
