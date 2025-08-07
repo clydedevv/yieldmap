@@ -40,12 +40,6 @@ const riskLevelLabels: Record<RiskLevel, string> = {
   high: 'High'
 };
 
-const riskLevelColors: Record<RiskLevel, string> = {
-  low: 'bg-green-100 text-green-800',
-  medium: 'bg-yellow-100 text-yellow-800',
-  high: 'bg-red-100 text-red-800'
-};
-
 const riskLevelOrder: Record<RiskLevel, number> = {
   low: 1,
   medium: 2,
@@ -57,6 +51,8 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
   const [loading, setLoading] = useState(true);
 
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [animatingRows, setAnimatingRows] = useState<Set<string>>(new Set());
+  const [collapsingRows, setCollapsingRows] = useState<Set<string>>(new Set());
   const [sortField, setSortField] = useState<SortField>('yield_percent');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
@@ -87,9 +83,21 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
     const isExpanded = expandedRows.has(strategyId);
     
     if (isExpanded) {
-      setExpandedRows(new Set([...expandedRows].filter(id => id !== strategyId)));
+      // Start collapse animation
+      setCollapsingRows(new Set([...collapsingRows, strategyId]));
+      setAnimatingRows(new Set([...animatingRows, strategyId]));
+      setTimeout(() => {
+        setExpandedRows(new Set([...expandedRows].filter(id => id !== strategyId)));
+        setAnimatingRows(new Set([...animatingRows].filter(id => id !== strategyId)));
+        setCollapsingRows(new Set([...collapsingRows].filter(id => id !== strategyId)));
+      }, 250);
     } else {
+      // Start expand animation
       setExpandedRows(new Set([...expandedRows, strategyId]));
+      setAnimatingRows(new Set([...animatingRows, strategyId]));
+      setTimeout(() => {
+        setAnimatingRows(new Set([...animatingRows].filter(id => id !== strategyId)));
+      }, 250);
     }
   };
 
@@ -209,11 +217,11 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
       {/* Strategies Table */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full table-fixed">
             <thead className="bg-slate-50">
               <tr>
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors"
+                  className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors w-1/2"
                   onClick={() => handleSort('name')}
                 >
                   <div className="flex items-center">
@@ -222,7 +230,7 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
                   </div>
                 </th>
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors w-28"
+                  className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors w-20"
                   onClick={() => handleSort('yield_percent')}
                 >
                   <div className="flex items-center">
@@ -231,7 +239,7 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
                   </div>
                 </th>
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors"
+                  className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors w-28"
                   onClick={() => handleSort('category')}
                 >
                   <div className="flex items-center">
@@ -240,7 +248,7 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
                   </div>
                 </th>
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors"
+                  className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors w-20"
                   onClick={() => handleSort('risk_level')}
                 >
                   <div className="flex items-center">
@@ -249,7 +257,7 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
                   </div>
                 </th>
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors"
+                  className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors w-24"
                   onClick={() => handleSort('lockup_period_days')}
                 >
                   <div className="flex items-center">
@@ -257,7 +265,7 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
                     <SortIcon field="lockup_period_days" />
                   </div>
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-24">
                   Chains
                 </th>
               </tr>
@@ -272,9 +280,9 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
                     }`}
                     onClick={() => toggleRowExpansion(strategy.id)}
                   >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center">
-                        <div className="mr-3">
+                    <td className="px-6 py-3">
+                      <div className="flex items-start">
+                        <div className="mr-3 flex-shrink-0 mt-0.5">
                           <svg 
                             className={`w-4 h-4 transition-all duration-200 ease-in-out ${
                               expandedRows.has(strategy.id) 
@@ -288,43 +296,47 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                           </svg>
                         </div>
-                        <div>
-                          <div className="text-sm font-medium text-slate-900">{strategy.name}</div>
-                          <div className="text-sm text-slate-500">{strategy.description}</div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm font-medium text-slate-900 mb-0.5">{strategy.name}</div>
+                          <div className="text-sm text-slate-500 leading-snug">{strategy.description}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 w-28">
+                    <td className="px-6 py-3">
                       <div className="text-sm font-bold text-green-600 whitespace-nowrap">
                         {formatYieldDisplay(strategy)}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-3">
                       <div className="text-sm text-slate-900">
                         {categoryLabels[strategy.category]}
                       </div>
                       {strategy.subcategory && (
-                        <div className="text-xs text-slate-500 capitalize">
+                        <div className="text-xs text-slate-500 capitalize mt-0.5">
                           {strategy.subcategory.replace('_', ' ')}
                         </div>
                       )}
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${riskLevelColors[strategy.risk_level]}`}>
+                    <td className="px-6 py-3">
+                      <span className={`text-sm font-medium ${
+                        strategy.risk_level === 'low' ? 'text-green-600' :
+                        strategy.risk_level === 'medium' ? 'text-yellow-600' :
+                        'text-red-600'
+                      }`}>
                         {riskLevelLabels[strategy.risk_level]}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-slate-900">
+                    <td className="px-6 py-3">
+                      <div className="text-sm text-slate-900 whitespace-nowrap">
                         {!strategy.lockup_period_days || strategy.lockup_period_days === 0 ? '—' : `${strategy.lockup_period_days} days`}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-1">
+                    <td className="px-6 py-3">
+                      <div className="flex items-center space-x-1 overflow-hidden">
                         {strategy.chains && strategy.chains.slice(0, 3).map((chain, index) => (
                           <div
                             key={index}
-                            className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium"
+                            className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium flex-shrink-0"
                             style={{ backgroundColor: chain.color + '20', color: chain.color }}
                             title={chain.name}
                           >
@@ -332,7 +344,7 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
                           </div>
                         ))}
                         {strategy.chains && strategy.chains.length > 3 && (
-                          <div className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-xs font-medium text-slate-600">
+                          <div className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-xs font-medium text-slate-600 flex-shrink-0">
                             +{strategy.chains.length - 3}
                           </div>
                         )}
@@ -342,47 +354,42 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
                   {expandedRows.has(strategy.id) && (
                     <tr>
                       <td colSpan={6} className="px-0 py-0 bg-slate-50/30">
+                        <div className={`overflow-hidden ${
+                          animatingRows.has(strategy.id) 
+                            ? collapsingRows.has(strategy.id) ? 'dropdown-exit' : 'dropdown-enter'
+                            : ''
+                        }`}>
                         <div className="px-6 py-4">
                             <div className="bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-shadow duration-200">
                               <div className="p-6">
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                                   
                                   {/* Entry Guide */}
-                                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-100">
-                                    <h4 className="text-sm font-semibold text-blue-900 mb-3 flex items-center">
-                                      <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                      </svg>
-                                      Getting Started
+                                  <div>
+                                    <h4 className="text-sm font-bold text-slate-900 mb-3 uppercase tracking-wide">
+                                      HOW TO GET STARTED
                                     </h4>
-                                    <p className="text-sm text-blue-800 leading-relaxed">
+                                    <p className="text-sm text-slate-700 leading-relaxed">
                                       {strategy.entry_guide}
                                     </p>
                                   </div>
 
                                   {/* Research Notes */}
                                   {strategy.notes && (
-                                    <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg p-4 border border-amber-100">
-                                      <h4 className="text-sm font-semibold text-amber-900 mb-3 flex items-center">
-                                        <svg className="w-4 h-4 mr-2 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                        </svg>
-                                        Research Notes
+                                    <div>
+                                      <h4 className="text-sm font-bold text-slate-900 mb-3 uppercase tracking-wide">
+                                        RESEARCH NOTES
                                       </h4>
-                                      <p className="text-sm text-amber-800 leading-relaxed">
+                                      <p className="text-sm text-slate-700 leading-relaxed">
                                         {strategy.notes}
                                       </p>
                                     </div>
                                   )}
 
                                   {/* Technical Details */}
-                                  <div className="bg-gradient-to-br from-slate-50 to-gray-50 rounded-lg p-4 border border-slate-200">
-                                    <h4 className="text-sm font-semibold text-slate-900 mb-4 flex items-center">
-                                      <svg className="w-4 h-4 mr-2 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                      </svg>
-                                      Technical Details
+                                  <div>
+                                    <h4 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wide">
+                                      TECHNICAL DETAILS
                                     </h4>
                                     
                                     {/* Chains */}
@@ -469,6 +476,7 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
                               </div>
                             </div>
                           </div>
+                        </div>
                       </td>
                     </tr>
                   )}
