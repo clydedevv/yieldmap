@@ -5,6 +5,9 @@ import Link from 'next/link';
 import { Strategy } from '@/types/strategy';
 import { StrategyAPI } from '@/lib/api';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export default function AdminPage() {
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(null);
@@ -100,6 +103,8 @@ export default function AdminPage() {
       ? 'bg-green-100 text-green-800' 
       : 'bg-red-100 text-red-800';
   };
+
+
 
   if (loading) {
     return (

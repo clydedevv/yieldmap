@@ -316,7 +316,7 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-slate-900">
-                        {strategy.lockup_period_days === 0 ? 'None' : `${strategy.lockup_period_days} days`}
+                        {!strategy.lockup_period_days || strategy.lockup_period_days === 0 ? '—' : `${strategy.lockup_period_days} days`}
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -408,7 +408,7 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
                                       <div>
                                         <div className="text-xs font-medium text-slate-500">Lockup Period</div>
                                         <div className="text-sm font-semibold text-slate-900">
-                                          {strategy.lockup_period_days === 0 ? 'None' : `${strategy.lockup_period_days} days`}
+                                          {!strategy.lockup_period_days || strategy.lockup_period_days === 0 ? '—' : `${strategy.lockup_period_days} days`}
                                         </div>
                                       </div>
                                       <div>

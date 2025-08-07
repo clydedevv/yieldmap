@@ -59,7 +59,7 @@ export const mockStrategies: Strategy[] = [
     notes: 'Leveraged strategies with smart contract risks. Auto-compounding can amplify both gains and losses. Requires understanding of basis trading mechanics.',
     last_updated_at: new Date('2024-01-15'),
     url: 'https://neutron.org/',
-    lockup_period_days: 0,
+    lockup_period_days: 10, // 7-14 days variable by vault settings
     is_audited: true,
     audit_url: 'https://neutron.org/security',
     risk_level: 'high',
@@ -249,7 +249,7 @@ export const mockStrategies: Strategy[] = [
     notes: 'Perp fixed-rate risks with Solana network dependencies. Fixed rates provide predictability but may underperform in high-yield environments.',
     last_updated_at: new Date('2024-01-15'),
     url: 'https://ratex.fi/',
-    lockup_period_days: 0,
+    lockup_period_days: 30, // Variable (7-90 days, user-selected)
     is_audited: true,
     audit_url: 'https://ratex.fi/security',
     risk_level: 'medium',
