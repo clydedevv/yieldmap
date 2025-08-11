@@ -24,7 +24,7 @@ export default function TopYieldSidebar({ onStrategyClick, topStrategies }: TopY
         <div className="btc-logo mr-3">
           ₿
         </div>
-        <h2 className="text-2xl font-bold text-slate-900">
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 tracking-tight">
           <span className="gradient-text">Top 5 Yields</span>
         </h2>
       </div>

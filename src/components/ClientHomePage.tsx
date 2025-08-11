@@ -30,17 +30,17 @@ export default function ClientHomePage({ categoryNodes, allStrategies, topStrate
             <div className="btc-logo mr-4">
               ₿
             </div>
-            <h1 className="text-6xl font-bold gradient-text">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold gradient-text tracking-tight">
               BTC Yield Explorer
             </h1>
           </div>
-                    <p className="text-xl text-slate-700 font-medium max-w-4xl mx-auto leading-relaxed">
+          <p className="text-lg sm:text-xl lg:text-2xl text-slate-600 font-medium max-w-5xl mx-auto leading-relaxed tracking-wide">
             Discover and analyze Bitcoin yield opportunities across native protocols, CEX liquid staking, on-chain strategies, and emerging L2 solutions.
           </p>
-          <div className="flex items-center justify-center mt-4">
-            <div className="inline-flex items-center bg-orange-100 px-4 py-2 rounded-full">
-              <div className="w-2 h-2 bg-orange-500 rounded-full mr-2 animate-pulse"></div>
-              <span className="text-sm font-semibold text-orange-800">Live yield data</span>
+          <div className="flex items-center justify-center mt-6">
+            <div className="inline-flex items-center bg-orange-100 px-5 py-3 rounded-full shadow-sm border border-orange-200">
+              <div className="w-2.5 h-2.5 bg-orange-500 rounded-full mr-3 animate-pulse"></div>
+              <span className="text-sm font-semibold text-orange-800 tracking-wide">Live yield data</span>
             </div>
           </div>
         </div>
@@ -57,7 +57,7 @@ export default function ClientHomePage({ categoryNodes, allStrategies, topStrate
               <div className="btc-logo mr-3">
                 ₿
               </div>
-              <h2 className="text-2xl font-bold text-slate-900">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 tracking-tight">
                 <span className="gradient-text">All Bitcoin Yield Strategies</span>
               </h2>
             </div>
