@@ -17,18 +17,33 @@ export default function AdminLayout({
   useEffect(() => {
     // Check if already authenticated
     const checkAuth = () => {
-      const authCookie = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('admin-auth='))
-        ?.split('=')[1]
-      
-      const authenticated = authCookie === 'authenticated'
-      console.log('Auth check:', { authCookie, authenticated })
-      setIsAuthenticated(authenticated)
+      try {
+        const authCookie = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('admin-auth='))
+          ?.split('=')[1]
+        
+        const authenticated = authCookie === 'authenticated'
+        console.log('Auth check:', { authCookie, authenticated, allCookies: document.cookie })
+        setIsAuthenticated(authenticated || false)
+      } catch (error) {
+        console.error('Auth check error:', error)
+        setIsAuthenticated(false)
+      }
     }
     
-    // Small delay to ensure DOM is ready
-    setTimeout(checkAuth, 100)
+    // Immediate check
+    checkAuth()
+    
+    // Fallback timeout in case something goes wrong
+    const fallbackTimeout = setTimeout(() => {
+      if (isAuthenticated === null) {
+        console.log('Fallback: setting auth to false')
+        setIsAuthenticated(false)
+      }
+    }, 1000)
+    
+    return () => clearTimeout(fallbackTimeout)
   }, [])
 
   const handleLogin = (e: React.FormEvent) => {
