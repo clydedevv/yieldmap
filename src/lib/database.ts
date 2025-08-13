@@ -3,14 +3,23 @@ import path from 'path';
 import fs from 'fs';
 import { Strategy, YieldSource, Chain } from '@/types/strategy';
 
-const dbPath = path.join(process.cwd(), 'data', 'strategies.db');
+// Environment-configurable database path
+const getDbPath = () => {
+  if (process.env.SQLITE_PATH) {
+    return process.env.SQLITE_PATH;
+  }
+  // Fallback to original path for development
+  return path.join(process.cwd(), 'data', 'strategies.db');
+};
+
+const dbPath = getDbPath();
 let db: Database.Database;
 
 // Initialize database
 export function initDatabase() {
   try {
     // Create data directory if it doesn't exist
-    const dataDir = path.join(process.cwd(), 'data');
+    const dataDir = path.dirname(dbPath);
     if (!fs.existsSync(dataDir)) {
       fs.mkdirSync(dataDir, { recursive: true });
     }

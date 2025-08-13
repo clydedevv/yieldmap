@@ -1,0 +1,29 @@
+[Unit]
+Description=YieldMap Production Worker
+Documentation=https://github.com/your-repo/yieldmap
+After=network.target
+
+[Service]
+Type=simple
+User=cosmos
+WorkingDirectory=/opt/yieldmap
+Environment=NODE_ENV=production
+EnvironmentFile=/opt/yieldmap/.env.production
+ExecStart=/usr/bin/npm run worker
+Restart=on-failure
+RestartSec=10
+KillMode=process
+
+# Output to journald
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=yieldmap-worker-prod
+
+# Security settings
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ReadWritePaths=/opt/yieldmap
+
+[Install]
+WantedBy=multi-user.target

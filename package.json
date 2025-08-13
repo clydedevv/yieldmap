@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "worker": "node dist/worker/index.js",
+    "lint": "next lint",
+    "migrate": "node dist/lib/migrate-database.js",
+    "seed": "node dist/lib/seed-database.js"
   },
   "dependencies": {
     "@types/sqlite3": "^3.1.11",

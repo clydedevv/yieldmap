@@ -1,0 +1,29 @@
+[Unit]
+Description=YieldMap Staging Worker
+Documentation=https://github.com/your-repo/yieldmap
+After=network.target
+
+[Service]
+Type=simple
+User=cosmos
+WorkingDirectory=/opt/yieldmap-staging
+Environment=NODE_ENV=production
+EnvironmentFile=/opt/yieldmap-staging/.env.staging
+ExecStart=/usr/bin/npm run worker
+Restart=on-failure
+RestartSec=10
+KillMode=process
+
+# Output to journald
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=yieldmap-worker-staging
+
+# Security settings
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ReadWritePaths=/opt/yieldmap-staging
+
+[Install]
+WantedBy=multi-user.target
