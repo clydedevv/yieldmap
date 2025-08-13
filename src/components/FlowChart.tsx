@@ -217,11 +217,11 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
       {/* Strategies Table */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full table-fixed">
+          <table className="w-full">
             <thead className="bg-slate-50">
               <tr>
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors w-1/2"
+                  className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors"
                   onClick={() => handleSort('name')}
                 >
                   <div className="flex items-center">
@@ -230,7 +230,7 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
                   </div>
                 </th>
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors w-20"
+                  className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors"
                   onClick={() => handleSort('yield_percent')}
                 >
                   <div className="flex items-center">
@@ -239,7 +239,7 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
                   </div>
                 </th>
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors w-28"
+                  className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors hidden sm:table-cell"
                   onClick={() => handleSort('category')}
                 >
                   <div className="flex items-center">
@@ -248,7 +248,7 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
                   </div>
                 </th>
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors w-20"
+                  className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors hidden md:table-cell"
                   onClick={() => handleSort('risk_level')}
                 >
                   <div className="flex items-center">
@@ -257,7 +257,7 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
                   </div>
                 </th>
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors w-24"
+                  className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors hidden lg:table-cell"
                   onClick={() => handleSort('lockup_period_days')}
                 >
                   <div className="flex items-center">
@@ -265,7 +265,7 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
                     <SortIcon field="lockup_period_days" />
                   </div>
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-24">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider hidden xl:table-cell">
                   Chains
                 </th>
               </tr>
@@ -280,9 +280,9 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
                     }`}
                     onClick={() => toggleRowExpansion(strategy.id)}
                   >
-                    <td className="px-6 py-3">
+                    <td className="px-3 sm:px-6 py-3">
                       <div className="flex items-start">
-                        <div className="mr-3 flex-shrink-0 mt-0.5">
+                        <div className="mr-2 sm:mr-3 flex-shrink-0 mt-0.5">
                           <svg 
                             className={`w-4 h-4 transition-all duration-200 ease-in-out ${
                               expandedRows.has(strategy.id) 
@@ -298,16 +298,29 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="text-sm font-medium text-slate-900 mb-0.5">{strategy.name}</div>
-                          <div className="text-sm text-slate-500 leading-snug">{strategy.description}</div>
+                          <div className="text-xs sm:text-sm text-slate-500 leading-snug line-clamp-2 sm:line-clamp-none">{strategy.description}</div>
+                          {/* Mobile-only compact info */}
+                          <div className="flex flex-wrap gap-1 mt-2 sm:hidden">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700">
+                              {categoryLabels[strategy.category]}
+                            </span>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                              strategy.risk_level === 'low' ? 'bg-green-100 text-green-700' :
+                              strategy.risk_level === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-red-100 text-red-700'
+                            }`}>
+                              {riskLevelLabels[strategy.risk_level]}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-3">
+                    <td className="px-3 sm:px-6 py-3">
                       <div className="text-sm font-bold text-green-600 whitespace-nowrap">
                         {formatYieldDisplay(strategy)}
                       </div>
                     </td>
-                    <td className="px-6 py-3">
+                    <td className="px-3 sm:px-6 py-3 hidden sm:table-cell">
                       <div className="text-sm text-slate-900">
                         {categoryLabels[strategy.category]}
                       </div>
@@ -317,7 +330,7 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
                         </div>
                       )}
                     </td>
-                    <td className="px-6 py-3">
+                    <td className="px-3 sm:px-6 py-3 hidden md:table-cell">
                       <span className={`text-sm font-medium ${
                         strategy.risk_level === 'low' ? 'text-green-600' :
                         strategy.risk_level === 'medium' ? 'text-yellow-600' :
@@ -326,12 +339,12 @@ const FlowChart = forwardRef<FlowChartRef, FlowChartProps>(({ allStrategies: pro
                         {riskLevelLabels[strategy.risk_level]}
                       </span>
                     </td>
-                    <td className="px-6 py-3">
+                    <td className="px-3 sm:px-6 py-3 hidden lg:table-cell">
                       <div className="text-sm text-slate-900 whitespace-nowrap">
                         {!strategy.lockup_period_days || strategy.lockup_period_days === 0 ? '—' : `${strategy.lockup_period_days} days`}
                       </div>
                     </td>
-                    <td className="px-6 py-3">
+                    <td className="px-3 sm:px-6 py-3 hidden xl:table-cell">
                       <div className="flex items-center space-x-1 overflow-hidden">
                         {strategy.chains && strategy.chains.slice(0, 3).map((chain, index) => (
                           <div

@@ -399,3 +399,62 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 2px 8px rgba(247, 147, 26, 0.1), 0 1px 4px rgba(0, 0, 0, 0.05);
   }
 }
+
+/* Enhanced line clamp utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* Mobile-first responsive improvements */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .btc-logo {
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 1rem;
+  }
+  
+  /* Better touch targets on mobile */
+  .hover-lift-btc {
+    min-height: 44px; /* iOS recommended touch target */
+  }
+  
+  /* Improved table responsiveness */
+  .table-fixed {
+    table-layout: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .btc-logo {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.875rem;
+  }
+  
+  /* Stack elements more aggressively on very small screens */
+  .flex-col-mobile {
+    flex-direction: column;
+  }
+}

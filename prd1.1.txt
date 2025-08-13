@@ -1,0 +1,230 @@
+# YieldMap PRD v1.1 — Live Metrics + Attestations
+
+> Scope: pivot from static “oracle” to **live, auditable metrics** (public) + **attestation/partner console** (private). Ship a narrow, high‑quality slice; expand breadth later. Positioning = **B + C** (Standards + Allocator OS). “A / Bloomberg skin” deferred.
+
+---
+
+## 0) Objectives & Success Criteria (8 weeks)
+
+* **Public**: 6–8 anchor strategies with **live net yield 30d**, **hover breakdown**, **timestamp chips**, and **regime tags**. 10k MAU; ≥2:00 session time; bounce <45%.
+* **Private**: 3 partners **attested** (hash‑anchored), 6 in Console, 2 **allocations influenced** for maxBTC. ≥1 badge revocation to show teeth.
+* **Process**: Weekly on‑chain anchors posted; Methodology v0.1 published + versioned.
+
+**Kill criteria**: If <3 partners share any data after 6 wks of BD → pause attestations, keep public-only oracle.
+
+---
+
+## 1) Feature Priorities
+
+### P0 (now)
+
+1. **Live Metrics v0 (Public)**
+
+   * Net APY (30d) + **20–80% band** and **yield stdev**
+   * Hover **Yield Breakdown** (fees / lending / funding / incentives / other)
+   * **Timestamp chip**: “Updated YYYY‑MM‑DD HH\:MM UTC (cadence)”
+   * **Confidence badge**: low/med/high
+   * **Remove** any “Live yield” banner if not truly real‑time
+
+2. **Methodology v0.1 + Taxonomy**
+
+   * Definitions per category; calculation formulas; rounding rules; caveats
+   * **Risk rubric**: 10 checks → Low/Med/High + small “n/10 checks” chip
+
+3. **Regime Board (Public)**
+
+   * Inputs: BTC 30d vol, perp OI, funding (avg/σ by venue), DEX depth
+   * Output: strategy tags (trend / chop / high‑funding / liquidity‑thin)
+
+4. **Partner Console MVP (Private)**
+
+   * CSV upload: period PnL, AUM, venue weights
+   * Redaction toggles: percentiles/bins, time‑lag
+   * One‑pager export (PDF) + **hash anchor** of artifacts (weekly Merkle root on Neutron)
+   * Badge: **“YieldMap Verified v0 (hash‑anchored)”**
+
+5. **League Tables (Private)**
+
+   * Comparables by category using **bins/percentiles only** until n≥5 attested
+   * **Inclusion Readiness Score** + invite CTA for maxBTC inclusion
+
+### P1 (after P0 ships)
+
+* **Capacity @5/10/25bp** (self‑reported vs inferred; show flag)
+* **Counterparty map** (venue/custodian HHI)
+* **Scenario stress** (funding +2σ; liquidity drawdown)
+* **zh‑CN brief generator** + WeChat‑sized share
+
+### P2
+
+* Read‑only CEX proofs (snapshot blobs), limited venues
+* Data API (aggregates only)
+* TEE/ZK explorations (do not block P0/P1)
+
+---
+
+## 2) Data Sourcing Strategy
+
+* **Tier 1 (Breadth)**: DeFiLlama adapters where pool/token mapping is exact; use for sanity + non‑spotlight names.
+* **Tier 2 (Depth)**: Protocol‑native APIs/subgraphs for **anchor** strategies (maxBTC, Velodrome WBTC/M‑BTC, Maple BTC, Solv BTC+, Midas/Euler, Dolomite+GMX). Prefer native over Llama when splits are exposed.
+* **Tier 3 (Direct)**: Team hookups (read‑only endpoints) **only** for partners targeted for Console/attestation or near‑term maxBTC inclusion.
+
+**Source hygiene**: Persist raw pulls (7 days), compute reconciled deltas (Llama vs native), auto‑flag >Xσ variance.
+
+---
+
+## 3) Adapters & Storage
+
+### Adapter Interface
+
+```ts
+export type YieldComponent = 'fees'|'lending'|'funding'|'incentives'|'other';
+
+export interface LiveYield {
+  net_apy_30d: number;
+  band_20_80?: [number, number];
+  stdev_30d?: number;
+  components: Partial<Record<YieldComponent, number>>;
+  updated_at: string;           // ISO UTC
+  cadence: 'hourly'|'daily';
+  confidence: 'low'|'med'|'high';
+  sources: string[];            // URIs or doc labels
+  notes?: string;
+}
+
+export interface StrategyAdapter {
+  id: string;                   // strategy_id
+  cadence: 'hourly'|'daily';
+  fetch(): Promise<LiveYield>;
+}
+```
+
+### DB Migrations (SQLite)
+
+* `live_yields(strategy_id TEXT, window TEXT, net REAL, band_low REAL, band_high REAL, stdev REAL, components_json TEXT, confidence TEXT, cadence TEXT, updated_at TEXT, PRIMARY KEY(strategy_id, window))`
+* `benchmarks(category TEXT, metric TEXT, window TEXT, value REAL, ts TEXT, PRIMARY KEY(category, metric, window))`
+* `partners(id TEXT PRIMARY KEY, org TEXT, region TEXT, contacts_json TEXT, kyc_status TEXT)`
+* `attestations(id TEXT PRIMARY KEY, strategy_id TEXT, period_start TEXT, period_end TEXT, proof_uri TEXT, merkle_root TEXT, attestor_sig TEXT, status TEXT, created_at TEXT)`
+* `exposures(strategy_id TEXT, venue TEXT, pct REAL, ts TEXT)`
+* `eligibility(strategy_id TEXT, score INTEGER, reasons_json TEXT, updated_at TEXT)`
+
+---
+
+## 4) API Endpoints
+
+* `GET /api/live/:strategy_id?window=30d` → `LiveYield`
+* `GET /api/benchmarks?category=...` → regime inputs
+* `POST /api/console/upload` → CSV ingest (auth)
+* `POST /api/console/attest` → produce artifact pack + anchor job (auth)
+* `GET /api/league?category=...` → redacted comparables (auth)
+
+Caching: ISR 5–15m for public endpoints; private endpoints no‑cache.
+
+---
+
+## 5) UI/UX Specs
+
+### Cards/Table
+
+* Replace ranges with: `12.1%  (8.9–14.7%)` + **chip** `Updated 2025‑08‑12 14:00 UTC`.
+* First line: **“Yield comes from:”** `fees • funding • incentives` (icons + tooltips)
+* **Risk chip**: `Risk: Medium (6/10 checks)`
+* **Confidence chip**: `Confidence: Med` (turns red if stale >24h)
+* **Capacity row**: `@10bp: n/a (seeking data)` until filled
+
+### Hover Breakdown (desktop) / Tap Drawer (mobile)
+
+```
+Net APY (30d)      10.8%
+ ├─ Trading fees     6.2%
+ ├─ Lending interest 2.1%
+ ├─ Funding basis    1.4%
+ ├─ Incentives       1.1% (token: XYZ; decay: 30d)
+ └─ Other            0.0%
+Confidence: Medium | Sources: [Velodrome], [Merkl], [Llama]
+```
+
+* If a component unknown → show `n/a` with dotted line; **never** fake sums.
+* If incentives ≥30% of APY → show yellow `Incentive‑weighted` pill.
+
+### Regime Board
+
+* Small dashboard card with 4 tiles + per‑strategy tag badges.
+
+### Console (Private)
+
+* Upload → preview parsed metrics → redaction sliders → “Generate Pack” → PDF + on‑chain hash link.
+* League view shows **bins/percentiles** only until privacy thresholds met.
+
+### Copy & Disclaimers
+
+* Every live number footnoted: “Historical, backward‑looking; net of known fees; emissions flagged; not advice.”
+* Methodology link and version next to timestamp.
+
+---
+
+## 6) Methodology v0.1 (excerpts)
+
+* **Net APY (30d)** = geometric mean of daily net returns over trailing 30D × 365; if daily unavailable, use protocol‑reported 30D APR with caveats.
+* **Band (20–80%)** = empirical percentile band of daily APY samples over trailing 30D.
+* **Stdev (30d)** = std dev of daily net returns.
+* **Components**: fees (DEX taker/maker or LP fees), lending interest, funding basis (perp), incentives (token emissions @ spot, linear decay if schedule), other.
+* **Confidence**: High (native API + reconciled), Med (single source or partial), Low (stale >24h or inferred).
+* **Risk rubric (10 checks)**: custody, audit age, oracle/bridge deps, admin keys/kill‑switch, chain liveness, venue concentration, liquidity depth, leverage usage, delta leakage, unwind half‑life.
+
+---
+
+## 7) Governance & Conflicts
+
+* Publish **Inclusion Policy** for maxBTC (objective gates + cooldowns).
+* Access logs for private datasets; Chinese wall doc.
+* Standards Council (3 externals) once n≥5 attested.
+
+---
+
+## 8) Internationalization (CN/SEA BD)
+
+* zh‑CN landing + one‑pager generator after P0.
+* ICP‑friendly CDN; keep primary infra outside CN. Financial‑promotion safe copy.
+
+---
+
+## 9) Engineering Plan & Timeline
+
+### Sprint 1 (Public trust)
+
+* Adapters for 6–8 anchors; `live_yields` table; ISR + timestamp chips
+* Hover breakdown component; Methodology v0.1 page
+* Regime board cron + tiles
+
+### Sprint 2 (Private leverage)
+
+* Console upload → attestation pack → weekly on‑chain anchor
+* League tables (bins) + Inclusion Readiness
+* zh‑CN brief generator
+
+---
+
+## 10) Risks & Mitigations
+
+* **Bad/late data** → confidence badge + “Stale” chip; keep last value; alerting on >Xσ variance.
+* **Incentive distortion** → explicit component; yellow pill when ≥30%.
+* **Legal optics** → disclaimers, no forward‑looking claims, methodology versioning, no retail promises.
+* **Conflict** → publish policy, council, revocable badges.
+
+---
+
+## 11) Open Questions
+
+* Capacity estimation default when unreported? (heuristic vs “n/a”)
+* Minimum n for public league tables without bins? (propose n≥5 attested)
+* Funding basis normalization across venues (OKX/Bybit/Binance) — pick one composite.
+
+---
+
+## 12) Glossary (short)
+
+* **Net APY (30d)**: 30‑day backward‑looking annualized return after fees.
+* **Incentives**: protocol/token rewards valued at spot; subject to decay.
+* **Confidence**: data quality indicator, not investment rating.
+* **Attestation**: hash‑anchored artifact pack proving reported metrics.

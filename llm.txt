@@ -1,0 +1,256 @@
+# YieldMap - BTC Yield Explorer
+
+## Overview
+
+YieldMap is a Next.js 15 application designed to be the "canonical BTC yield oracle" - an interactive, comprehensive platform for exploring Bitcoin yield opportunities. The app serves as a curated database of Bitcoin yield strategies across different categories, from native BTC staking to complex DeFi integrations.
+
+## Purpose & Vision
+
+**Core Mission**: Stop "what's the best BTC yield rn?" Twitter replies forever by providing a canonical, always-updating yield oracle for the masses.
+
+**Primary Goal**: Provide a professional, intuitive interface for discovering and comparing Bitcoin yield opportunities with real-time data, risk assessments, and actionable entry guides.
+
+## Architecture Overview
+
+### Technology Stack
+- **Framework**: Next.js 15 with App Router and React 19
+- **Build Tool**: Turbopack for development
+- **Database**: SQLite with better-sqlite3 (file-based at `data/strategies.db`)
+- **Styling**: Tailwind CSS 4
+- **Language**: TypeScript 5
+- **Flow Visualization**: Previously used @xyflow/react (now converted to table-based display)
+
+### Core Features
+1. **Interactive Strategy Display**: Table-based interface with expandable rows showing detailed strategy information
+2. **Real-time Yield Tracking**: Database-driven yield percentages with manual update capability
+3. **Risk Assessment**: Three-tier risk system (low/medium/high) with visual indicators
+4. **Category Organization**: Five main categories with subcategory drilling
+5. **Admin Interface**: Full CRUD operations for strategy management
+6. **Top Yield Sidebar**: Cross-category highest yields with quick access
+7. **Strategy Visibility Control**: Show/hide strategies without deletion
+
+## Project Structure
+
+```
+/
+├── src/
+│   ├── app/                    # Next.js App Router
+│   │   ├── admin/             # Admin interface for strategy management
+│   │   ├── api/               # RESTful API endpoints
+│   │   │   └── strategies/    # Strategy CRUD operations
+│   │   ├── layout.tsx         # Root layout
+│   │   └── page.tsx           # Homepage (server-side data fetching)
+│   ├── components/            # React components
+│   │   ├── ClientHomePage.tsx # Client-side homepage wrapper
+│   │   ├── FlowChart.tsx      # Main strategy table display
+│   │   ├── StrategyList.tsx   # Strategy list component
+│   │   └── TopYieldSidebar.tsx # Top strategies sidebar
+│   ├── lib/                   # Utilities and business logic
+│   │   ├── api.ts            # Client-side API wrapper
+│   │   ├── database.ts       # SQLite database operations
+│   │   ├── data-service.ts   # Data aggregation and category logic
+│   │   ├── migrate-database.ts # Database migration utilities
+│   │   └── seed-database.ts  # Initial data seeding
+│   ├── types/                # TypeScript type definitions
+│   │   └── strategy.ts       # Core data models
+│   └── data/                 # Mock data (now deprecated)
+├── data/                     # SQLite database storage
+│   └── strategies.db         # Main database file
+├── public/                   # Static assets
+└── Configuration files       # Next.js, TypeScript, Tailwind, ESLint
+```
+
+## Data Model
+
+### Core Types
+
+#### Strategy
+The central data model representing a yield opportunity:
+```typescript
+interface Strategy {
+  id: string;
+  category: StrategyCategory;
+  subcategory?: StrategySubcategory;
+  name: string;
+  yield_percent: number;
+  min_yield_percent?: number;  // For yield ranges
+  max_yield_percent?: number;  // For yield ranges
+  description: string;
+  entry_guide: string;        // How-to instructions
+  notes?: string;             // Research notes
+  last_updated_at: Date;
+  url?: string;               // Protocol URL
+  lockup_period_days?: number;
+  is_audited: boolean;
+  audit_url?: string;
+  risk_level: RiskLevel;      // 'low' | 'medium' | 'high'
+  yield_sources: YieldSource[];
+  chains: Chain[];
+}
+```
+
+#### Categories
+Five main strategy categories:
+- **native_btc**: Pure Bitcoin network yield (Lightning routing, etc.)
+- **cex_lst**: Centralized exchange liquid staking tokens
+- **onchain_lst**: On-chain liquid staking and DeFi protocols
+- **babylon_core**: Babylon protocol and CoreDAO security-as-a-service
+- **l2_strategies**: Layer 2 and cross-chain strategies
+
+#### Subcategories
+- **dex_lp**: DEX liquidity provision
+- **lending_lp**: Lending protocol participation
+- **perp_dex_lp**: Perpetual DEX liquidity provision
+- **crosschain_lp**: Cross-chain liquidity strategies
+- **alt_lp**: Alternative liquidity strategies
+
+## Database Schema
+
+### Tables
+1. **strategies**: Core strategy data with all fields
+2. **yield_sources**: Related yield sources per strategy (1:many)
+3. **chains**: Blockchain associations per strategy (1:many)
+
+### Key Features
+- SQLite with proper indexing and foreign key constraints
+- Transaction-based operations for data consistency
+- Auto-initialization with schema creation
+- Strategy visibility control via `is_active` boolean
+- Comprehensive CRUD operations with atomic updates
+
+## API Architecture
+
+### RESTful Endpoints
+- `GET /api/strategies` - List strategies (with ?active=true/false filter)
+- `GET /api/strategies/[id]` - Get single strategy
+- `POST /api/strategies` - Create new strategy
+- `PUT /api/strategies/[id]` - Update strategy
+- `DELETE /api/strategies/[id]` - Delete strategy
+- `POST /api/strategies/[id]/toggle` - Toggle visibility
+
+### Client API Wrapper
+The `StrategyAPI` class provides a clean interface for all CRUD operations with proper error handling and TypeScript typing.
+
+## User Experience
+
+### Main Interface
+- **Table-based Display**: Replaced flowchart with sortable, responsive table
+- **Expandable Rows**: Detailed strategy information with technical details
+- **Mobile Responsive**: Optimized layouts for all screen sizes
+- **Sort & Filter**: Multiple sorting options (yield, risk, category, etc.)
+- **Visual Risk Indicators**: Color-coded risk levels with clear labeling
+
+### Admin Interface
+- **Full Strategy Management**: Create, edit, delete, and toggle visibility
+- **Real-time Updates**: Changes reflect immediately across the platform
+- **Form Validation**: Comprehensive input validation and error handling
+- **Bulk Operations**: Visibility management without data loss
+
+## Information Architecture
+
+The application follows a hierarchical structure designed for intuitive navigation:
+
+```
+BTC Yield Explorer
+├── Native BTC Yield
+├── CEX LSTs
+├── On-chain LSTs
+│   ├── DEX LPs
+│   ├── Lending LPs
+│   ├── Perp DEX LPs
+│   ├── Cross-chain LPs
+│   └── Alt LPs
+├── Babylon/CoreDAO LSTs + Security-as-a-Service
+└── L2 Strategies
+```
+
+Each category contains specific strategies with:
+- Real-time yield percentages
+- Risk assessments
+- Entry guides
+- Research notes
+- Technical details (chains, lockup periods, audits)
+
+## Development Workflow
+
+### Running the Application
+```bash
+npm run dev     # Development server with Turbopack
+npm run build   # Production build
+npm run start   # Production server
+npm run lint    # ESLint checking
+```
+
+### Database Management
+- Database auto-initializes on first run
+- Migrations handled via `migrate-database.ts`
+- Seeding available via `seed-database.ts`
+- Manual updates through admin interface
+
+### Key Development Patterns
+- Server-side data fetching for SEO optimization
+- Client-side hydration for interactivity
+- Transaction-based database operations
+- Comprehensive error handling
+- TypeScript strict mode throughout
+
+## Current State & Implementation
+
+### Completed Features
+✅ SQLite database with complete schema
+✅ Full CRUD API endpoints
+✅ Admin interface with strategy management
+✅ Table-based strategy display (replaced flowchart)
+✅ Strategy visibility management
+✅ Real-time data updates
+✅ Mobile-responsive design
+✅ Risk assessment system
+✅ Comprehensive strategy cards with technical details
+
+### Data Content
+The platform currently includes 14+ example strategies across all categories, ranging from high-yield (17.5%) complex DeFi strategies to stable (4.5%) native Bitcoin options. Each strategy includes:
+- Detailed descriptions and entry guides
+- Risk assessments and research notes
+- Chain support and yield source breakdowns
+- Audit status and protocol URLs
+- Lockup periods and technical requirements
+
+### Technical Highlights
+- **Performance**: Optimized with Next.js 15 and Turbopack
+- **Type Safety**: Comprehensive TypeScript coverage
+- **Data Integrity**: SQLite with foreign keys and transactions
+- **UX**: Smooth animations and responsive design
+- **Scalability**: Prepared for real-time yield data integration
+
+## Future Roadmap
+
+### V1 Scope (Current MVP)
+- ✅ Static backend database (manual updates)
+- ✅ Real-time yield % updated manually
+- ✅ No live chain integrations yet
+- ✅ Fully working table-based UI
+- ✅ Top 5 sidebar
+- ✅ Admin panel for data entry
+
+### Next Priority Features
+1. **Yield Breakdowns**: Detailed component breakdown of where yields come from
+2. **Live Yield Integration**: Real-time yield data via protocol APIs/subgraphs
+3. **Enhanced Strategy Cards**: More detailed risk and technical analysis
+
+### Future Enhancements
+- User portfolio tracking
+- Yield notifications and alerts
+- Advanced filtering and search
+- Strategy comparison tools
+- Social features and community insights
+
+## Philosophy & Approach
+
+**Mission**: "Canonical yield oracle" - professional, reliable, always up-to-date
+**Development**: Fast shipping with iterative improvements
+**UX Priority**: Keep it minimal, no clutter, no bloat
+**Data Quality**: Verify or disclaim - no fake APYs
+**Performance**: Buttery smooth interactions
+**Maintenance**: Trivial admin updates
+
+The project focuses on rapid iteration and shipping - getting core functionality live quickly, then enhancing with advanced features like live yield data and detailed breakdowns. Emphasis on clean architecture that supports fast feature development.
